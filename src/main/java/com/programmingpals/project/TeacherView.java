@@ -8,6 +8,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -31,6 +33,15 @@ public class TeacherView extends Application {
         // Dropdown for selecting a student
     	ComboBox<String> studentSelector = new ComboBox<>();
     	loadStudents(studentSelector);
+    	studentSelector.setPrefWidth(200);
+    	studentSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
+    	    if (newValue != null) {
+    	    	// TODO:
+    	        // newValue holds the text of the newly selected item
+    	    	// use this to parse student data from studentsData and display information
+    	    	// studentsData should be up to date with all student information by this point
+    	    }
+    	});
 
         // Text area for viewing student progress
         TextArea progressArea = new TextArea();
@@ -44,8 +55,10 @@ public class TeacherView extends Application {
         // Button for submitting a new challenge
         Button addChallengeButton = new Button("Add Challenge");
         addChallengeButton.setOnAction(e -> {
-            String newChallenge = newChallengeField.getText();
-            // TODO: challenge logic
+            String newChallenge = newChallengeField.getText().trim();
+            if (!newChallenge.isEmpty()) {
+                addNewChallenge(newChallenge);
+            }
             newChallengeField.clear();
         });
         
@@ -82,6 +95,36 @@ public class TeacherView extends Application {
         stage.show();
     }
     
+    private void addNewChallenge(String newChallenge) {
+        Type type = new TypeToken<List<String>>() {}.getType();
+        List<String> challenges;
+
+        // Load existing challenges
+        try (FileReader reader = new FileReader(Utils.CHALLENGES_DATABASE)) {
+            challenges = gson.fromJson(reader, type);
+            if (challenges == null) {
+                challenges = new ArrayList<>();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Utils.showAlert("Error loading challenges.");
+            return;
+        }
+
+        // Add new challenge
+        if (!challenges.contains(newChallenge)) {
+            challenges.add(newChallenge);
+            try (FileWriter writer = new FileWriter(Utils.CHALLENGES_DATABASE)) {
+                gson.toJson(challenges, writer);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Utils.showAlert("Error saving challenges.");
+            }
+        } else {
+            Utils.showAlert("Challenge already exists.");
+        }
+    }
+    
     private void loadStudents(ComboBox<String> comboBox) {
         Type type = new TypeToken<Map<String, StudentData>>() {}.getType();
         Map<String, StudentData> data;
@@ -94,6 +137,9 @@ public class TeacherView extends Application {
             Utils.showAlert("Error loading students data.");
             return;
         }
+        
+        if (data == null)
+        	return;
         
         // Add students & data to main map
         for (Map.Entry<String,StudentData> entry : data.entrySet()) {

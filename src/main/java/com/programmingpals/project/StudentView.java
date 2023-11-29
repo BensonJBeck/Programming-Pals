@@ -32,6 +32,12 @@ public class StudentView extends Application {
     @Override
     public void start(Stage stage) {
         Random rand = new Random();
+        
+        // TODO: 
+        // figure out a way to self idenfity
+        // right now the code uses "test name 1" as seen above
+        // need a way to say who you are so your submissions
+        // go to the right place
 
         // List of challenges
         ListView<String> challengeList = new ListView<>();
