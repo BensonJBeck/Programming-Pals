@@ -30,19 +30,7 @@ public class TeacherView extends Application {
 	
     @Override
     public void start(Stage stage) {
-        // Dropdown for selecting a student
-    	ComboBox<String> studentSelector = new ComboBox<>();
-    	loadStudents(studentSelector);
-    	studentSelector.setPrefWidth(200);
-    	studentSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
-    	    if (newValue != null) {
-    	    	// TODO:
-    	        // newValue holds the text of the newly selected item
-    	    	// use this to parse student data from studentsData and display information
-    	    	// studentsData should be up to date with all student information by this point
-    	    }
-    	});
-
+    	
         // Text area for viewing student progress
         TextArea progressArea = new TextArea();
         progressArea.setEditable(false);
@@ -51,6 +39,51 @@ public class TeacherView extends Application {
         // Text field for adding a new challenge
         TextField newChallengeField = new TextField();
         newChallengeField.setPromptText("Challenge name...");
+        
+        // Dropdown for selecting a student
+    	ComboBox<String> studentSelector = new ComboBox<>();
+    	loadStudents(studentSelector);
+    	studentSelector.setPrefWidth(200);
+    	studentSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
+    	    if (newValue != null) {
+    	        Type type = new TypeToken<Map<String, StudentData>>() {}.getType();
+    	        Map<String, StudentData> data;
+
+    	        // Load data from file
+    	        try (FileReader reader = new FileReader(Utils.STUDENTS_DATABASE)) {
+    	            data = gson.fromJson(reader, type);
+    	        } catch (IOException e) {
+    	            e.printStackTrace();
+    	            Utils.showAlert("Error loading students data.");
+    	            return;
+    	        }
+    	        
+    	        if (data == null) {
+    	        	return;
+    	        }
+    	        
+    	        // Add students & data to main map
+    	        for (Map.Entry<String,StudentData> entry : data.entrySet()) {
+    	        	studentsData.put(entry.getKey(), entry.getValue());
+    	        }
+    	        
+    	        StudentData studentChallenges = studentsData.get(newValue);
+    	        
+    	        if(studentChallenges != null) {
+    	        	progressArea.setText(studentChallenges.toString());
+    	        }
+    	        
+    	        else {
+    	        	Utils.showAlert("Student has not completed any challenges!");
+    	        	return;
+    	        }
+    	    	// TODO:
+    	        // newValue holds the text of the newly selected item
+    	    	// use this to parse student data from studentsData and display information
+    	    	// studentsData should be up to date with all student information by this point
+    	    	// Fetch the json data under the key newValue and display it to progress 
+    	    }
+    	});
 
         // Button for submitting a new challenge
         Button addChallengeButton = new Button("Add Challenge");
