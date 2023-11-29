@@ -22,10 +22,9 @@ import java.io.FileReader;
 import java.lang.reflect.Type;
 
 public class TeacherView extends Application {
-
-	private final String STUDENTS_DATABASE = "students.json";
 	
 	private Map<String, StudentData> studentsData = new HashMap<>();
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	
     @Override
     public void start(Stage stage) {
@@ -67,7 +66,7 @@ public class TeacherView extends Application {
                 // Add to database
                 createStudentData(newStudent);
             } else {
-                showAlert("Student already exists!");
+            	Utils.showAlert("Student already exists!");
             }
         });
 
@@ -84,16 +83,15 @@ public class TeacherView extends Application {
     }
     
     private void loadStudents(ComboBox<String> comboBox) {
-        Gson gson = new Gson();
         Type type = new TypeToken<Map<String, StudentData>>() {}.getType();
         Map<String, StudentData> data;
 
         // Load data from file
-        try (FileReader reader = new FileReader(STUDENTS_DATABASE)) {
+        try (FileReader reader = new FileReader(Utils.STUDENTS_DATABASE)) {
             data = gson.fromJson(reader, type);
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error loading students data.");
+            Utils.showAlert("Error loading students data.");
             return;
         }
         
@@ -111,31 +109,21 @@ public class TeacherView extends Application {
     
     private void createStudentData(String studentName) {
         if (studentsData.containsKey(studentName)) {
-            showAlert("Student already exists!");
+            Utils.showAlert("Student already exists!");
             return;
         }
 
         // Create new student data and add to main map
         StudentData studentData = new StudentData();
-        studentData.Challenges = new Challenge[] {};
         studentsData.put(studentName, studentData);
 
         // Append to students file
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try (Writer writer = new FileWriter(STUDENTS_DATABASE)) {
+        try (Writer writer = new FileWriter(Utils.STUDENTS_DATABASE)) {
             gson.toJson(studentsData, writer);
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Error saving students data.");
+            Utils.showAlert("Error saving students data.");
         }
-    }
-
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Message");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
     
     public static void main(String[] args) {

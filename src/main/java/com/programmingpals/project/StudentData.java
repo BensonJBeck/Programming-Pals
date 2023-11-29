@@ -1,5 +1,7 @@
 package com.programmingpals.project;
 
+import java.util.ArrayList;
+
 public class StudentData {
-	public Challenge[] Challenges;
+	public ArrayList<ChallengeAttempt> ChallengeAttempts = new ArrayList<>();
 }
