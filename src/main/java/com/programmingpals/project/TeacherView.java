@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -140,8 +141,40 @@ public class TeacherView extends Application {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            Utils.showAlert("Error loading challenges.");
-            return;
+            Utils.showAlert("Error loading challenges. Creating defaults.");
+            
+            challenges = Arrays.asList(
+                    "Reverse a string",
+                    "Calculate the factorial of a number",
+                    "Find the largest number in an array",
+                    "Sort an array of integers",
+                    "Check if a string is a palindrome",
+                    "Implement the Fibonacci sequence",
+                    "Find the common elements in two arrays",
+                    "Implement a binary search algorithm",
+                    "Calculate the sum of digits of a number",
+                    "Check if a number is prime",
+                    "Find the first non-repeated character in a string",
+                    "Implement a basic calculator for addition and subtraction",
+                    "Count the number of vowels in a string",
+                    "Convert a binary number to decimal",
+                    "Merge two sorted arrays",
+                    "Find the second highest number in an array",
+                    "Remove duplicates from an array",
+                    "Rotate an array to the right by k steps",
+                    "Find the intersection of two arrays",
+                    "Convert a decimal number to binary",
+                    "sort a list",
+                    "newChallenge2"
+                );
+            
+            try (FileWriter writer = new FileWriter(Utils.CHALLENGES_DATABASE)) {
+                gson.toJson(challenges, writer);
+            } catch (IOException e2) {
+                e2.printStackTrace();
+                Utils.showAlert("Error creating challenges.json.");
+                return;
+            }
         }
 
         // Add new challenge
@@ -167,8 +200,37 @@ public class TeacherView extends Application {
             data = gson.fromJson(reader, type);
         } catch (IOException e) {
             e.printStackTrace();
-            Utils.showAlert("Error loading students data.");
-            return;
+            Utils.showAlert("Error loading students data. Creating default student 'user'.");
+
+            // create students.json
+            String initialUserData = "{\n" +
+                    "  \"user\": {\n" +
+                    "    \"ChallengeAttempts\": [\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Calculate the factorial of a number\",\n" +
+                    "        \"Score\": 27\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Implement the Fibonacci sequence\",\n" +
+                    "        \"Score\": 22\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Find the intersection of two arrays\",\n" +
+                    "        \"Score\": 31\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }\n" +
+                    "}";
+            
+            try (FileWriter writer = new FileWriter("students.json")) {
+                writer.write(initialUserData);
+                data = new HashMap<>(); // Initialize data to avoid NullPointerException
+                data.put("user", new StudentData()); // Replace with appropriate StudentData object
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                Utils.showAlert("Error creating students.json file.");
+                return; // Return from the method if file creation fails
+            }
         }
         
         if (data == null)

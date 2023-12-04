@@ -24,20 +24,46 @@ import java.io.*;
 import java.util.*;
 
 public class StudentView extends Application {
-
-	private Map<String, StudentData> studentsData = new HashMap<>();
-    private String currentStudentName = "test name 1";
-    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 	
+	private Map<String, StudentData> studentsData = new HashMap<>();
+    private String currentStudentName = "not set";
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    
+    public void setCurrentStudentName(String name) {
+    	
+    	if (name == null || name.trim().isEmpty()) 
+    	{
+    		currentStudentName = "anonymous";
+    	}
+    	else
+    	{
+    		currentStudentName = name.trim();
+    	}
+    }
+
+
+    
+    public String getCurrentStudentName()
+    {
+    	return currentStudentName;
+    }
+    
     @Override
     public void start(Stage stage) {
         Random rand = new Random();
         
-        // TODO: 
-        // figure out a way to self idenfity
+        // figure out a way to self identify
         // right now the code uses "test name 1" as seen above
         // need a way to say who you are so your submissions
         // go to the right place
+        TextInputDialog loginScreen = new TextInputDialog();
+        loginScreen.setTitle("Student Login");
+        loginScreen.setHeaderText("Please enter username. Leave blank for anonymity.");
+        loginScreen.setContentText("Full name:");
+        // System.out.println("reached");
+        
+        Optional<String> inputName = loginScreen.showAndWait();
+        setCurrentStudentName(inputName.orElse(null));        
 
         // List of challenges
         ListView<String> challengeList = new ListView<>();
@@ -81,7 +107,14 @@ public class StudentView extends Application {
         // Main scene
         Scene scene = new Scene(layout, 700, 400);
         stage.setScene(scene);
-        stage.setTitle("Student View");
+        if (currentStudentName == null)
+        {
+        	stage.setTitle("Logged In As: Anonymous");
+        }
+        else 
+        {
+        	stage.setTitle("Logged In As: " + currentStudentName);
+        }
         stage.show();
         
         // Load data
@@ -133,16 +166,43 @@ public class StudentView extends Application {
             studentsData = gson.fromJson(reader, type);
         } catch (IOException e) {
             e.printStackTrace();
-            Utils.showAlert("Error loading students data.");
-        }
+            Utils.showAlert("Error loading students data. Creating default student 'user'.");
+            
+            // create students.json
+            String initialUserData = "{\n" +
+                    "  \"user\": {\n" +
+                    "    \"ChallengeAttempts\": [\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Calculate the factorial of a number\",\n" +
+                    "        \"Score\": 27\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Implement the Fibonacci sequence\",\n" +
+                    "        \"Score\": 22\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Find the intersection of two arrays\",\n" +
+                    "        \"Score\": 31\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }\n" +
+                    "}";
 
-        if (studentsData == null) {
-            studentsData = new HashMap<>();
+                try (FileWriter writer = new FileWriter("students.json")) {
+                    writer.write(initialUserData);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    Utils.showAlert("Error creating students.json file.");
+                }
+            }
+
+            if (studentsData == null) {
+                studentsData = new HashMap<>();
+            }
         }
-    }
     
     private void loadChallenges(ListView<String> listView) {
-    	// Loca current challenge list
+        // Local current challenge list
         Gson gson = new Gson();
         Type type = new TypeToken<List<String>>() {}.getType();
         List<String> challenges;
@@ -151,8 +211,42 @@ public class StudentView extends Application {
             challenges = gson.fromJson(reader, type);
         } catch (IOException e) {
             e.printStackTrace();
-            Utils.showAlert("Error loading challenges.");
-            return;
+            Utils.showAlert("Error loading challenges. Creating default challenges.");
+
+            // create challenges.json
+            List<String> defaultChallenges = Arrays.asList(
+                "Reverse a string",
+                "Calculate the factorial of a number",
+                "Find the largest number in an array",
+                "Sort an array of integers",
+                "Check if a string is a palindrome",
+                "Implement the Fibonacci sequence",
+                "Find the common elements in two arrays",
+                "Implement a binary search algorithm",
+                "Calculate the sum of digits of a number",
+                "Check if a number is prime",
+                "Find the first non-repeated character in a string",
+                "Implement a basic calculator for addition and subtraction",
+                "Count the number of vowels in a string",
+                "Convert a binary number to decimal",
+                "Merge two sorted arrays",
+                "Find the second highest number in an array",
+                "Remove duplicates from an array",
+                "Rotate an array to the right by k steps",
+                "Find the intersection of two arrays",
+                "Convert a decimal number to binary",
+                "sort a list",
+                "newChallenge2"
+            );
+            
+            try (FileWriter writer = new FileWriter(Utils.CHALLENGES_DATABASE)) {
+                gson.toJson(defaultChallenges, writer);
+                challenges = defaultChallenges;
+            } catch (IOException e2) {
+                e2.printStackTrace();
+                Utils.showAlert("Error creating challenges.json.");
+                return;
+            }
         }
 
         // Add to list
