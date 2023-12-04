@@ -3,7 +3,7 @@ Final project submission for CS1530
 
 1) CD into the root directory of the project
 
-- ```cd ~/Programming-Pals ```
+- ```cd <path-to-folder>/Programming-Pals```
 
 3) prepare project
 
