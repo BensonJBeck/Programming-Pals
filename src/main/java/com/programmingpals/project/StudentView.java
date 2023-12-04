@@ -39,6 +39,7 @@ public class StudentView extends Application {
     	{
     		currentStudentName = name.trim();
     	}
+
     }
 
 
@@ -63,7 +64,46 @@ public class StudentView extends Application {
         // System.out.println("reached");
         
         Optional<String> inputName = loginScreen.showAndWait();
-        setCurrentStudentName(inputName.orElse(null));        
+        setCurrentStudentName(inputName.orElse(null));    
+        
+
+    	Type type = new TypeToken<Map<String, StudentData>>() {}.getType();
+        try (FileReader reader = new FileReader(Utils.STUDENTS_DATABASE)) {
+            studentsData = gson.fromJson(reader, type);
+        } catch (IOException e) {
+            e.printStackTrace();
+            
+            // create students.json
+            String initialUserData = "{\n" +
+                    "  \"" + currentStudentName + "\": {\n" +
+                    "    \"ChallengeAttempts\": [\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Calculate the factorial of a number\",\n" +
+                    "        \"Score\": 27\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Implement the Fibonacci sequence\",\n" +
+                    "        \"Score\": 22\n" +
+                    "      },\n" +
+                    "      {\n" +
+                    "        \"ChallengeName\": \"Find the intersection of two arrays\",\n" +
+                    "        \"Score\": 31\n" +
+                    "      }\n" +
+                    "    ]\n" +
+                    "  }\n" +
+                    "}";
+
+                try (FileWriter writer = new FileWriter("students.json")) {
+                    writer.write(initialUserData);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    Utils.showAlert("Error creating students.json file.");
+                }
+            }
+
+            if (studentsData == null) {
+                studentsData = new HashMap<>();
+            }
 
         // List of challenges
         ListView<String> challengeList = new ListView<>();
