@@ -9,7 +9,7 @@ Final project submission for CS1530
 
 - ```mvn clean package```
 
-3) launching the .jar files
+3) launching the .jar files from the root directory
 
 - To launch StudentView.java:
   
